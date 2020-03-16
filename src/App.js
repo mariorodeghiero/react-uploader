@@ -5,7 +5,6 @@ import * as S from "./styles";
 import Upload from "./components/Upload";
 import axios from "axios";
 import sha256 from "crypto-js/sha256";
-import { ProgressBar, Button } from "react-bootstrap";
 
 class App extends React.Component {
   state = {
@@ -14,19 +13,21 @@ class App extends React.Component {
   };
 
   fileSelectedHandler = event => {
-    this.setState({
-      selectedFile: event.target.files[0],
-      loaded: 0
-    });
-    this.generateHash(event.target.files[0]);
+    if (event.target.files[0] !== undefined) {
+      this.setState({
+        selectedFile: event.target.files[0],
+        loaded: 0
+      });
+      this.generateHash(event.target.files[0]);
+    }
   };
 
   generateHash = file => {
     let reader = new FileReader();
     reader.onload = event => {
       let data = event.target.result;
-      let encrypted = sha256(data);
-      this.setState({ hash: encrypted });
+      let hash = sha256(data);
+      this.setState({ hash: hash });
     };
     reader.readAsBinaryString(file);
   };
@@ -57,24 +58,7 @@ class App extends React.Component {
     return (
       <S.Container>
         <S.Content>
-          {/* <Upload/> */}
-          {/* <S.DropArea htmlFor="file-upload" class="custom-file-upload">
-            <S.FakeBtn>Choose your files</S.FakeBtn>
-            <span>or drag and drop files here</span>
-            {!!this.state.selectedFile && <p>{this.state.selectedFile.name}</p>}
-          </S.DropArea> */}
-          <S.Input
-            type="file"
-            id="file-upload"
-            onChange={this.fileSelectedHandler}
-          />
-          <S.FooterContent>
-            <ProgressBar
-              now={Math.round(this.state.loaded, 2)}
-              label={`${Math.round(this.state.loaded, 2)}%`}
-            />
-            <S.Button onClick={this.fileUploadHandler}>Submit</S.Button>
-          </S.FooterContent>
+          <Upload selectedFile={this.state.selectedFile === null} fileSelectedHandler={this.fileSelectedHandler} loaded={this.state.loaded} fileUploadHandler={this.fileUploadHandler}/>
         </S.Content>
         <GlobalStyle />
       </S.Container>
